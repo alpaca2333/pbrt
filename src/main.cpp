@@ -1,6 +1,11 @@
 #include <iostream>
 
+#include "core/math/vec3.h"
+
+using namespace std;
+
 int main() {
-  std::cout << "Hello, World!" << std::endl;
+  Vec3f v1{1, 2, 3};
+  cout << v1.Length() << endl;
   return 0;
 }
