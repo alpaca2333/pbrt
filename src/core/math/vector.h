@@ -21,13 +21,15 @@ class Vector3
 public:
   Vector3() = default;
   Vector3(double a, double b, double c);
-  double e[3];
   inline double& operator[](int i) { return e[i]; }
+  inline double operator[](int i) const { return e[i]; }
   inline Vector3& operator=(const Vector3& vec);
   inline Vector3 operator-() const;
   friend inline Vector3 operator+(const Vector3& vec1, const Vector3& vec2);
   friend inline Vector3 operator-(const Vector3& vec1, const Vector3& vec2);
   inline Vector3 operator*(double k) const;
+  // This 'x' operator simply times each field of the 2 vectors.
+  // Use 'Dot' or 'Cross' method for the read vector timing operations.
   inline Vector3 operator*(const Vector3& vec);
   inline Vector3 operator/(double k) const;
   inline Vector3 operator/(const Vector3& vec);
@@ -42,10 +44,13 @@ public:
   inline bool operator!=(const Vector3& v);
   inline bool Parallel(const Vector3 &v) const;
   friend std::ostream& operator<<(std::ostream& os, const Vector3& v);
+protected:
+  double e[3];
 };
 
-
 Vector3 vsqrt(const Vector3& v);
+
+using Point3 = Vector3;
 
 //=========================== inline function definitions ==============================
 

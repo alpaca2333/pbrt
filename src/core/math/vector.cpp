@@ -16,7 +16,7 @@ Vector3::Vector3(double a, double b, double c)
 
 Vector3 vsqrt(const Vector3& v)
 {
-  return {sqrt(v.e[0]), sqrt(v.e[1]), sqrt(v.e[2])};
+  return {sqrt(v[0]), sqrt(v[1]), sqrt(v[2])};
 }
 
 
