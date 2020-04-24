@@ -1,7 +1,7 @@
 project(pbrt)
 
 set(CORE_SOURCE_FILES
-        math/vector3.cpp
+        math/vector.cpp
         concurrency/thread_pool.cpp
         math/matrix.cpp)
 
