@@ -1,5 +1,8 @@
 #pragma once
 
+#include <cstdio>
+#include <cstdlib>
+
 #define DEBUG
 #define nullable
 #define notnull
@@ -8,7 +11,7 @@
 inline void __replacement_assert(const char *__condition)
 {
 #ifdef DEBUG
-  printf("Assertion '%s' failed.\n", __condition);
+  std::printf("Assertion '%s' failed.\n", __condition);
   exit(1);
 #endif
 }

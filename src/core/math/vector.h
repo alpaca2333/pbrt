@@ -8,24 +8,44 @@
 #include <cmath>
 #include <type_traits>
 #include <vector>
+#include <array>
+#include <initializer_list>
+#include <cassert>
+
+#define VERY_SMALL_FLAOT 0.00000001
+
+// D for dimensions, T for data type.
+template <typename T, typename std::enable_if<std::is_floating_point<T>::value, int>::type = 0>
+class _VectorTrait { };
 
 template <int D, typename T>
-class Vector
+class Vector;
+
+// We use Point/Normal as an alias for Vector, for sake of convenient conversions
+// between them.
+using Normal3f = Vector<3, float>;
+using Vector3f = Vector<3, float>;
+using Point3f = Vector<3, float>;
+using Normal2f = Vector<2, float>;
+using Vector2f = Vector<2, float>;
+using Point2f = Vector<2, float>;
+
+
+template <int D, typename T>
+class Vector : _VectorTrait<T>
 {
 public:
-  Vector() = default;
-  Vector(T elements[D]);
-  explicit Vector(std::vector<T> &&elements);
-  template <typename DTrait = typename std::enable_if<D == 3>::type>
-  Vector(T x, T y, T z) { e[0] = x; e[1] = y; e[2] = z; };
+  Vector();
+  Vector(std::initializer_list<T> args);
+  Vector(const std::array<T, D>& arr) : e(arr) { }
 
-  double& operator[](int i) { return e[i]; }
-  double operator[](int i) const { return e[i]; }
-  Vector<D, T>& operator=(const Vector<D, T>& vec);
-  Vector<D, T> operator-() const;
-  Vector<D, T> operator*(T k) const;
-  // This 'x' operator simply times each field of the 2 vectors.
-  // Use 'Dot' or 'Cross' method for the read vector timing operations.
+  T& operator[](int i) { return e[i]; }
+  T operator[](int i) const { return e[i]; }
+
+  // +-*/ operations between vectors and constants.
+
+  // This '*' operator simply times each field of the 2 vectors.
+  // Use 'Dot' or 'Cross' method for the real vector timing operations.
   Vector<D, T> operator*(const Vector<D, T>& vec);
   Vector<D, T> operator/(T k) const;
   Vector<D, T> operator/(const Vector<D, T>& vec);
@@ -33,48 +53,62 @@ public:
   Vector<D, T>& operator-=(const Vector<D, T>& vec);
   Vector<D, T>& operator*=(T k);
   Vector<D, T>& operator/=(T k);
+  Vector<D, T>& operator=(const Vector<D, T>& vec);
+  Vector<D, T> operator-() const;
+  Vector<D, T> operator*(T k) const;
+
+  // Dot product of this and vec.
   T Dot(const Vector<D, T> &vec) const;
 
-  template <typename DTrait = typename std::enable_if<D == 3>::type>
+  // Cross product of this and vec.
+  // Currently only enabled for 3D vectors.
+  template <int U = D, typename DTrait = typename std::enable_if<U == 3>::type>
   Vector<D, T> Cross(const Vector<D, T> &vec) const;
 
+  // Normalized vector of itself
   Vector<D, T> N() const;
+
   [[nodiscard]] double Length() const;
+
+  // Equalization between vectors.
   bool operator!=(const Vector<D, T>& v) const;
   bool operator==(const Vector<D, T>& v) const;
   bool Parallel(const Vector<D, T> &v) const;
 
-  constexpr static size_t DataSize() { return sizeof(T) * D; }
+  // Size of the data block.
+  constexpr size_t DataSize() { return e.size() * sizeof(T); }
   T *Data() const { return e; }
 protected:
-  T e[D];
+  std::array<T, D> e;
 };
 
 
 // ======================= implementations =========================
 template <int D, typename T>
-Vector<D, T>::Vector(T elements[D])
+Vector<D, T>::Vector(std::initializer_list<T> args)
 {
-  memcpy(e, elements, sizeof(T) * D);
-}
-
-template <int D, typename T>
-Vector<D, T>::Vector(std::vector<T> &&vec)
-{
-  memcpy(e, vec.data(), sizeof(T) * D);
+  auto iter = e.begin();
+  for (auto arg: args)
+  {
+    *iter = arg;
+    if (++iter == e.end())
+    {
+      break;
+    }
+  }
 }
 
 template <int D, typename T>
 Vector<D, T> &Vector<D, T>::operator=(const Vector<D, T> &vec) {
   if (&vec == this) return *this;
-  memcpy(e, vec.e, Vector::DataSize());
+  memcpy(e.data(), vec.e.data(), this->DataSize());
   return *this;
 }
 
 template <int D, typename T>
 Vector<D, T> Vector<D, T>::operator-() const
 {
-  T res[D];
+  std::array<T, D> res;
   for (int i = 0; i < D; ++i)
   {
     res[i] = -e[i];
@@ -84,7 +118,7 @@ Vector<D, T> Vector<D, T>::operator-() const
 
 template <int D, typename T>
 Vector<D, T> operator+(const Vector<D, T> &vec1, const Vector<D, T> &vec2) {
-  T res[D];
+  std::array<T, D> res;
   for (int i = 0; i < D; ++i)
   {
     res[i] = vec1[i] + vec2[i];
@@ -94,7 +128,7 @@ Vector<D, T> operator+(const Vector<D, T> &vec1, const Vector<D, T> &vec2) {
 
 template <int D, typename T>
 Vector<D, T> operator-(const Vector<D, T> &vec1, const Vector<D, T> &vec2) {
-  T res[D];
+  std::array<T, D> res;
   for (int i = 0; i < D; ++i)
   {
     res[i] = vec1[i] - vec2[i];
@@ -104,7 +138,7 @@ Vector<D, T> operator-(const Vector<D, T> &vec1, const Vector<D, T> &vec2) {
 
 template <int D, typename T>
 Vector<D, T> Vector<D, T>::operator*(T k) const {
-  T res[D];
+  std::array<T, D> res;
   for (int i = 0; i < D; ++i)
   {
     res[i] = e[i] * k;
@@ -115,7 +149,7 @@ Vector<D, T> Vector<D, T>::operator*(T k) const {
 
 template <int D, typename T>
 Vector<D, T> Vector<D, T>::operator*(const Vector<D, T> &vec) {
-  T res[D];
+  std::array<T, D> res;
   for (int i = 0; i < D; ++i)
   {
     res[i] = e[i] * vec[i];
@@ -126,7 +160,7 @@ Vector<D, T> Vector<D, T>::operator*(const Vector<D, T> &vec) {
 
 template <int D, typename T>
 Vector<D, T> Vector<D, T>::operator/(T k) const {
-  T res[D];
+  std::array<T, D> res;
   for (int i = 0; i < D; ++i)
   {
     res[i] = e[i] / k;
@@ -137,7 +171,7 @@ Vector<D, T> Vector<D, T>::operator/(T k) const {
 
 template <int D, typename T>
 Vector<D, T> Vector<D, T>::operator/(const Vector<D, T> &vec) {
-  T res[D];
+  std::array<T, D> res;
   for (int i = 0; i < D; ++i)
   {
     res[i] = e[i] / vec[i];
@@ -193,7 +227,7 @@ T Vector<D, T>::Dot(const Vector<D, T> &vec) const {
 }
 
 template <int D, typename T>
-template <typename DTrait>
+template <int U, typename DTrait>
 Vector<D, T> Vector<D, T>::Cross(const Vector<D, T> &vec) const {
   T ele[3] = {static_cast<T>(e[1]*vec[2] - vec[1]*e[2]), static_cast<T>(e[2]*vec[0] - vec[2]*e[0]), static_cast<T>(e[0]*vec[1] - vec[0]*e[1])};
   return {ele};
@@ -202,7 +236,7 @@ Vector<D, T> Vector<D, T>::Cross(const Vector<D, T> &vec) const {
 template <int D, typename T>
 Vector<D, T> Vector<D, T>::N() const {
   double len = Length();
-  T res[D];
+  std::array<T, D> res;
   for (int i = 0; i < D; ++i)
   {
     res[i] = e[i] / len;
@@ -251,7 +285,7 @@ bool Vector<D, T>::Parallel(const Vector<D, T> &vec) const {
     {
       continue;
     }
-    if (std::abs(static_cast<double>(e[i] / vec[i] - scale)) > 0.0000001)
+    if (std::abs(static_cast<double>(e[i] / vec[i] - scale)) > VERY_SMALL_FLAOT)
     {
       return false;
     }
@@ -260,19 +294,25 @@ bool Vector<D, T>::Parallel(const Vector<D, T> &vec) const {
 }
 
 template <int D, typename T>
+Vector<D, T>::Vector()
+{
+  memset(e.data(), 0, DataSize());
+}
+
+template <int D, typename T>
 std::ostream &operator<<(std::ostream &os, const Vector<D, T> &v) {
-  os << "{ ";
+  os << "[ ";
   for (int i = 0; i < D; ++i)
   {
     os << v[i] << " ";
   }
-  os << "}";
+  os << "]";
   return os;
 }
 
 template <int Df, typename Tf>
 Vector<Df, Tf> operator*(Tf t, const Vector <Df, Tf> &vec2) {
-  Tf res[Df];
+  std::array<Tf, Df> res;
   for (int i = 0; i < Df; ++i)
   {
     res[i] = static_cast<Tf>(vec2[i] * t);
