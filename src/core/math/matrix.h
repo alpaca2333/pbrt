@@ -14,6 +14,7 @@ class _MatrixTrait { };
 template <int N, int M, typename T>
 class Matrix;
 
+using Matrix3f = Matrix<3, 3, float>;
 
 template <int N, int M, typename DT>
 class Matrix : _MatrixTrait<DT>
@@ -72,7 +73,7 @@ Matrix<N, M1, DT> Matrix<N, M, DT>::operator*(const Matrix <N1, M1, DT> &m) {
       result[i][j] = 0;
       for (int k = 0; k < M; ++k)
       {
-        result[i][j] += e[i][k] * e[k][j];
+        result[i][j] += e[i][k] * m[k][j];
       }
     }
   }

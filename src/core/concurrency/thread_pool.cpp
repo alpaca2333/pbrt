@@ -3,6 +3,7 @@
 //
 
 #include <iostream>
+#include <functional>
 
 #include "thread_pool.h"
 

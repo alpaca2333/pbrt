@@ -12,6 +12,7 @@
 #include <initializer_list>
 #include <cassert>
 #include <iostream>
+#include <cstring>
 
 #define VERY_SMALL_FLAOT 0.00000001
 
@@ -89,7 +90,7 @@ template <int Df, typename Tf>
 Vector<Df, Tf> operator*(Tf t, const Vector <Df, Tf> &vec2);
 
 
-// // ======================= vector3f =========================
+// ======================= vector3f =========================
 Vector3f Vsqrt(const Vector3f & v);
 Vector3f Refract(const Vector3f &income, const Vector3f &n, double r);
 Vector3f Reflect(const Vector3f &income, const Vector3f &n);

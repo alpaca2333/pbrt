@@ -17,6 +17,7 @@ Vector3f Vsqrt(const Vector3f & v)
   };
 }
 
+// TODO Rewrite it in a more elegant way.
 Vector3f Refract(const Vector3f &income, const Vector3f &n, double r)
 {
   if (income.Parallel(n)) return income;
