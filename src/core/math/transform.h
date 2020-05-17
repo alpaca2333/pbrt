@@ -41,10 +41,10 @@ class Translate : public _transform<T>
 {
 public:
   Translate(T dx, T dy, T dz);
-  virtual _transform<T> Inverse() { return Translate(-dx, -dy, -dz); }
+  virtual _transform<T> Inverse() { return Translate(-dx_, -dy_, -dz_); }
 
 protected:
-  T dx, dy, dz;
+  T dx_, dy_, dz_;
 };
 
 // Scaling
@@ -53,9 +53,21 @@ class Scale : public _transform<T>
 {
 public:
   Scale(T sx, T sy, T sz);
-  virtual _transform<T> Inverse() { return Scale(1 / sx, 1 / sy, 1 / sz); }
+  virtual _transform<T> Inverse() { return Scale(1 / sx_, 1 / sy_, 1 / sz_); }
 protected:
-  T sx, sy, sz;
+  T sx_, sy_, sz_;
+};
+
+// Rotate about a custom axis a.
+template <typename T>
+class AxisRotate : public _transform<T>
+{
+public:
+  AxisRotate(Vector3f a, float theta);
+  virtual _transform<T> Inverse() { return AxisRotate(a_, -theta_); }
+protected:
+  Vector3f a_;
+  float theta_;
 };
 
 using Translatef = Translate<float>;
@@ -101,7 +113,7 @@ Vector<3, T> _transform<T>::operator()(const Vector<3, T> & m)
 }
 
 template <typename T>
-Translate<T>::Translate(T dx, T dy, T dz) : dx(dx), dy(dy), dz(dz)
+Translate<T>::Translate(T dx, T dy, T dz) : dx_(dx), dy_(dy), dz_(dz)
 {
   for (int i = 0; i < 4; ++i)
   {
@@ -113,7 +125,7 @@ Translate<T>::Translate(T dx, T dy, T dz) : dx(dx), dy(dy), dz(dz)
 }
 
 template <typename T>
-Scale<T>::Scale(T sx, T sy, T sz) : sx(sx), sy(sy), sz(sz)
+Scale<T>::Scale(T sx, T sy, T sz) : sx_(sx), sy_(sy), sz_(sz)
 {
   this->t_[0][0] = sx;
   this->t_[1][3] = sy;
@@ -121,4 +133,14 @@ Scale<T>::Scale(T sx, T sy, T sz) : sx(sx), sy(sy), sz(sz)
   this->t_[3][3] = 1;
 }
 
+template <typename T>
+AxisRotate<T>::AxisRotate(Vector3f a, float theta) : a_(a), theta_(theta)
+{
+  this->t_ = Matrix<4, 4, float>{
+      {a[0] * a[0] + cos(theta) * (1 - a[0] * a[0]), a[2] * (a[1] * a[1] - 1) * sin(theta), a[1] * (1 - a[2] * a[2]) * sin(theta), 0},
+      {a[2] * (1 - a[0] * a[0]) * sin(theta), a[1] * a[1] + cos(theta) * (1 - a[1] * a[1]), a[0] * (a[2] * a[2] - 1) * sin(theta), 0},
+      {a[1] * (a[2] * a[2] - 1) * sin(theta), a[0] * (1 - a[1] * a[1]) * sin(theta), a[2] * a[2] + cos(theta) * (1 - a[2] * a[2]), 0},
+      {0, 0, 0, 1}
+  };
+}
 }
