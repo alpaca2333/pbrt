@@ -18,7 +18,7 @@
 
 // D for dimensions, T for data type.
 template <typename T, typename std::enable_if<std::is_floating_point<T>::value, int>::type = 0>
-class _VectorTrait { };
+class VectorTrait { };
 
 template <int D, typename T>
 class Vector;
@@ -34,7 +34,7 @@ using Point2f = Vector<2, float>;
 
 
 template <int D, typename T>
-class Vector : _VectorTrait<T>
+class Vector : VectorTrait<T>
 {
 public:
   Vector();
@@ -77,11 +77,11 @@ public:
   // Equalization between vectors.
   bool operator!=(const Vector<D, T>& v) const;
   bool operator==(const Vector<D, T>& v) const;
-  bool Parallel(const Vector<D, T> &v) const;
+  [[nodiscard]] bool Parallel(const Vector<D, T> &v) const;
 
   // Size of the data block.
   constexpr size_t DataSize() { return e.size() * sizeof(T); }
-  T *Data() const { return e; }
+  [[nodiscard]] T *Data() const { return e; }
 protected:
   std::array<T, D> e;
 };
@@ -349,7 +349,7 @@ Vector<D, T> Vector<D, T>::operator+(const Vector<D, T> &vec) const
 template <int D, typename T>
 Vector<D, T> Vector<D, T>::operator-(const Vector<D, T> &vec) const
 {
-  std::array<T, D> res;
+  std::array<T, D> res{};
   for (int i = 0; i < D; ++i)
   {
     res[i] = e[i] - vec[i];

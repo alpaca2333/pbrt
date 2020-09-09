@@ -9,7 +9,7 @@
 #include "vector.h"
 
 template <typename T, typename std::enable_if<std::is_floating_point<T>::value, int>::type = 0>
-class _MatrixTrait { };
+class MatrixTrait { };
 
 template <int N, int M, typename T>
 class Matrix;
@@ -17,7 +17,7 @@ class Matrix;
 using Matrix3f = Matrix<3, 3, float>;
 
 template <int N, int M, typename DT>
-class Matrix : _MatrixTrait<DT>
+class Matrix : MatrixTrait<DT>
 {
 public:
   Matrix() = default;

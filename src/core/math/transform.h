@@ -22,14 +22,13 @@ namespace Transform
 
 // All transformations should have a inverse transformation.
 template <typename T>
-class _transform
-{
+class Transform {
 public:
-  _transform() = default;
-  _transform(const Matrix<4, 4, T> &t) : t_(t) { }
+  Transform() = default;
+  Transform(const Matrix<4, 4, T> &t) : t_(t) { }
   Vector<3, T> operator()(const Vector<3, T> &m);
-  virtual _transform Inverse() { return *this; };
-  _transform<T> Append(const _transform<T>& t) { return t_ * t.t_; }
+  virtual Transform Inverse() { return *this; };
+  Transform<T> Append(const Transform<T>& t) { return t_ * t.t_; }
 protected:
   Matrix<4, 4, T> t_;
 };
@@ -37,11 +36,11 @@ protected:
 
 // Translation.
 template <typename T>
-class Translate : public _transform<T>
+class Translate : public Transform<T>
 {
 public:
   Translate(T dx, T dy, T dz);
-  virtual _transform<T> Inverse() { return Translate(-dx_, -dy_, -dz_); }
+  virtual Transform<T> Inverse() { return Translate(-dx_, -dy_, -dz_); }
 
 protected:
   T dx_, dy_, dz_;
@@ -49,22 +48,22 @@ protected:
 
 // Scaling
 template <typename T>
-class Scale : public _transform<T>
+class Scale : public Transform<T>
 {
 public:
   Scale(T sx, T sy, T sz);
-  virtual _transform<T> Inverse() { return Scale(1 / sx_, 1 / sy_, 1 / sz_); }
+  virtual Transform<T> Inverse() { return Scale(1 / sx_, 1 / sy_, 1 / sz_); }
 protected:
   T sx_, sy_, sz_;
 };
 
 // Rotate about a custom axis a.
 template <typename T>
-class AxisRotate : public _transform<T>
+class AxisRotate : public Transform<T>
 {
 public:
   AxisRotate(Vector3f a, float theta);
-  virtual _transform<T> Inverse() { return AxisRotate(a_, -theta_); }
+  virtual Transform<T> Inverse() { return AxisRotate(a_, -theta_); }
 protected:
   Vector3f a_;
   float theta_;
@@ -102,7 +101,7 @@ Vector<D, T> operator*(const Matrix<D, D, T> &m, const Vector<D, T> &vec)
 namespace Transform
 {
 template <typename T>
-Vector<3, T> _transform<T>::operator()(const Vector<3, T> & m)
+Vector<3, T> Transform<T>::operator()(const Vector<3, T> & m)
 {
   Matrix<4, 1, T> hv{{m[0]}, {m[1]}, {m[2]}, {1}};
   auto hres = t_ * hv;
@@ -137,9 +136,9 @@ template <typename T>
 AxisRotate<T>::AxisRotate(Vector3f a, float theta) : a_(a), theta_(theta)
 {
   this->t_ = Matrix<4, 4, float>{
-      {a[0] * a[0] + cos(theta) * (1 - a[0] * a[0]), a[2] * (a[1] * a[1] - 1) * sin(theta), a[1] * (1 - a[2] * a[2]) * sin(theta), 0},
-      {a[2] * (1 - a[0] * a[0]) * sin(theta), a[1] * a[1] + cos(theta) * (1 - a[1] * a[1]), a[0] * (a[2] * a[2] - 1) * sin(theta), 0},
-      {a[1] * (a[2] * a[2] - 1) * sin(theta), a[0] * (1 - a[1] * a[1]) * sin(theta), a[2] * a[2] + cos(theta) * (1 - a[2] * a[2]), 0},
+      {static_cast<float>(a[0] * a[0] + cos(theta) * (1 - a[0] * a[0])), static_cast<float>(a[2] * (a[1] * a[1] - 1) * sin(theta)), static_cast<float>(a[1] * (1 - a[2] * a[2]) * sin(theta)), 0},
+      {static_cast<float>(a[2] * (1 - a[0] * a[0]) * sin(theta)), static_cast<float>(a[1] * a[1] + cos(theta) * (1 - a[1] * a[1])), static_cast<float>(a[0] * (a[2] * a[2] - 1) * sin(theta)), 0},
+      {static_cast<float>(a[1] * (a[2] * a[2] - 1) * sin(theta)), static_cast<float>(a[0] * (1 - a[1] * a[1]) * sin(theta)), static_cast<float>(a[2] * a[2] + cos(theta) * (1 - a[2] * a[2])), 0},
       {0, 0, 0, 1}
   };
 }

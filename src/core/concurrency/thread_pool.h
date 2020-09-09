@@ -23,10 +23,10 @@ public:
 
   explicit ThreadPool(uint32_t capacity);
 
-  bool AddJob(Job job);
+  bool AddJob(const Job& job);
 
   /* 多少毫秒后触发这个 Job */
-  bool OnTimeOut(Job job, time_t timeout);
+  bool OnTimeOut(const Job& job, time_t timeout);
 
   template <class Func, class... Args>
   bool AddJob(Func &&func, Args &&... args);
@@ -43,12 +43,12 @@ public:
   uint32_t GetJobQueueCapacity() { return job_queue_capacity_; }
 
   // 获取当前正在运行的线程数量
-  uint32_t GetThreadCount() const { return thread_count_; }
+  [[nodiscard]] uint32_t GetThreadCount() const { return thread_count_; }
 
   // 获取任务队列长度
-  size_t GetJobCount() const { return job_queue_.size(); }
+  [[nodiscard]] size_t GetJobCount() const { return job_queue_.size(); }
 
-  uint32_t GetCapacity() { return thread_capacity_; }
+  [[nodiscard]] uint32_t GetCapacity() const { return thread_capacity_; }
 
 protected:
   uint32_t job_queue_capacity_ = 10000;
@@ -71,7 +71,7 @@ private:
 template <class Func, class... Args>
 bool ThreadPool::AddJob(Func &&func, Args &&... args)
 {
-  return !!AddJobWithRet(std::forward<Func>(func), std::forward<Args>(args)...);
+  return AddJobWithRet(std::forward<Func>(func), std::forward<Args>(args)...);
 }
 
 template <class Func, class... Args>

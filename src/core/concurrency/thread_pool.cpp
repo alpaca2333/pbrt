@@ -67,7 +67,7 @@ ThreadPool::~ThreadPool()
   }
 }
 
-bool ThreadPool::AddJob(Job job)
+bool ThreadPool::AddJob(const Job& job)
 {
   synchronized(mutex_for_job_queue_)
   {
@@ -79,7 +79,7 @@ bool ThreadPool::AddJob(Job job)
   return true;
 }
 
-bool ThreadPool::OnTimeOut(ThreadPool::Job job, time_t timeout)
+bool ThreadPool::OnTimeOut(const ThreadPool::Job& job, time_t timeout)
 {
   auto delayed_job = [=] {
     this_thread::sleep_for(chrono::milliseconds(timeout));
