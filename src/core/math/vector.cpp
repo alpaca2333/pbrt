@@ -17,7 +17,10 @@ Vector3f Vsqrt(const Vector3f & v)
   };
 }
 
-// TODO Rewrite it in a more elegant way.
+/**
+ * TODO 重写，这也太丑了
+ * @param r 平面入射方向的反射率与出射方向的反射率的比值
+ */
 Vector3f Refract(const Vector3f &income, const Vector3f &n, double r)
 {
   if (income.Parallel(n)) return income;

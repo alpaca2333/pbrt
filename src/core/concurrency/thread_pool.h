@@ -10,6 +10,7 @@
 #include <future>
 #include <queue>
 #include <vector>
+#include <thread>
 #include <condition_variable>
 
 #include "common.h"
@@ -17,53 +18,53 @@
 class ThreadPool
 {
 public:
-  typedef std::function<void()> Job;
+    typedef std::function<void()> Job;
 
-  ThreadPool() = delete;
+    ThreadPool() = delete;
 
-  explicit ThreadPool(uint32_t capacity);
+    explicit ThreadPool(uint32_t capacity);
 
-  bool AddJob(const Job& job);
+    bool AddJob(const Job &job);
 
-  /* 多少毫秒后触发这个 Job */
-  bool OnTimeOut(const Job& job, time_t timeout);
+    /* 多少毫秒后触发这个 Job */
+    bool OnTimeOut(const Job &job, time_t timeout);
 
-  template <class Func, class... Args>
-  bool AddJob(Func &&func, Args &&... args);
+    template <class Func, class... Args>
+    bool AddJob(Func &&func, Args &&... args);
 
-  /* 返回一个 future 指针。如果添加任务失败，返回 nullptr */
-  template <class Func, class... Args>
-  auto AddJobWithRet(Func &&func, Args &&... args)
-  -> std::unique_ptr<std::future<decltype(func(args...))>>;
+    /* 返回一个 future 指针。如果添加任务失败，返回 nullptr */
+    template <class Func, class... Args>
+    auto AddJobWithRet(Func &&func, Args &&... args)
+        -> std::unique_ptr<std::future<decltype(func(args...))>>;
 
-  virtual ~ThreadPool();
+    virtual ~ThreadPool();
 
 public:
-  void SetJobQueueCapacity(uint32_t capacity) { job_queue_capacity_ = capacity; }
-  uint32_t GetJobQueueCapacity() { return job_queue_capacity_; }
+    void SetJobQueueCapacity(uint32_t capacity) { job_queue_capacity_ = capacity; }
+    uint32_t GetJobQueueCapacity() { return job_queue_capacity_; }
 
-  // 获取当前正在运行的线程数量
-  [[nodiscard]] uint32_t GetThreadCount() const { return thread_count_; }
+    // 获取当前正在运行的线程数量
+    [[nodiscard]] uint32_t GetThreadCount() const { return thread_count_; }
 
-  // 获取任务队列长度
-  [[nodiscard]] size_t GetJobCount() const { return job_queue_.size(); }
+    // 获取任务队列长度
+    [[nodiscard]] size_t GetJobCount() const { return job_queue_.size(); }
 
-  [[nodiscard]] uint32_t GetCapacity() const { return thread_capacity_; }
+    [[nodiscard]] uint32_t GetCapacity() const { return thread_capacity_; }
 
 protected:
-  uint32_t job_queue_capacity_ = 10000;
+    uint32_t job_queue_capacity_ = 10000;
 
-  uint32_t thread_capacity_ = 1000;
+    uint32_t thread_capacity_ = 1000;
 
 private:
-  std::queue<Job> job_queue_;
-  std::recursive_mutex mutex_for_job_queue_;
+    std::queue<Job> job_queue_;
+    std::recursive_mutex mutex_for_job_queue_;
 
-  std::vector<std::thread> threads_;
-  std::atomic<bool> run_flag_;
-  std::condition_variable cv_;
+    std::vector<std::thread> threads_;
+    std::atomic<bool> run_flag_;
+    std::condition_variable cv_;
 
-  std::atomic<uint32_t> thread_count_;
+    std::atomic<uint32_t> thread_count_;
 };
 
 //-------------------implementations----------------
@@ -71,36 +72,36 @@ private:
 template <class Func, class... Args>
 bool ThreadPool::AddJob(Func &&func, Args &&... args)
 {
-  return AddJobWithRet(std::forward<Func>(func), std::forward<Args>(args)...);
+    return !!AddJobWithRet(std::forward<Func>(func), std::forward<Args>(args)...);
 }
 
 template <class Func, class... Args>
 auto ThreadPool::AddJobWithRet(Func &&func, Args &&... args)
--> std::unique_ptr<std::future<decltype(func(args...))>>
+    -> std::unique_ptr<std::future<decltype(func(args...))>>
 {
-  using ResType = decltype(func(args...));
-  if (!run_flag_)
-    return nullptr;
-  synchronized(mutex_for_job_queue_)
-  {
-    if (job_queue_.size() >= job_queue_capacity_)
-      return nullptr;
-  }
-  auto pJob = std::make_shared<std::packaged_task<ResType()>>(
-      std::bind(std::forward<Func>(func), std::forward<Args>(args)...));
+    using ResType = decltype(func(args...));
+    if (!run_flag_)
+        return nullptr;
+    synchronized(mutex_for_job_queue_)
+    {
+        if (job_queue_.size() >= job_queue_capacity_)
+            return nullptr;
+    }
+    auto pJob = std::make_shared<std::packaged_task<ResType()>>(
+        std::bind(std::forward<Func>(func), std::forward<Args>(args)...));
 
-  std::unique_ptr<std::future<ResType>> p_res(new std::future<ResType>(pJob->get_future()));
+    std::unique_ptr<std::future<ResType>> p_res(new std::future<ResType>(pJob->get_future()));
 
-  synchronized(mutex_for_job_queue_)
-  {
-    if (job_queue_.size() >= job_queue_capacity_)
-      return nullptr;
-    job_queue_.push(
-        [pJob]() -> void {
-          (*pJob)();
-        });
-  }
-  // 唤醒一个线程
-  cv_.notify_one();
-  return p_res;
+    synchronized(mutex_for_job_queue_)
+    {
+        if (job_queue_.size() >= job_queue_capacity_)
+            return nullptr;
+        job_queue_.push(
+            [pJob]() -> void {
+                (*pJob)();
+            });
+    }
+    // 唤醒一个线程
+    cv_.notify_one();
+    return p_res;
 }

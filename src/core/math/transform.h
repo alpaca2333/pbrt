@@ -105,9 +105,6 @@ Vector<3, T> Transform<T>::operator()(const Vector<3, T> & m)
 {
   Matrix<4, 1, T> hv{{m[0]}, {m[1]}, {m[2]}, {1}};
   auto hres = t_ * hv;
-  std::cout << t_ << std::endl;
-  std::cout << hv << std::endl;
-  std::cout << hres << std::endl;
   return {hres[0][0], hres[1][0], hres[2][0]};
 }
 

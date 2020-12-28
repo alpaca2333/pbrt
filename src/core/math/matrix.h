@@ -64,7 +64,7 @@ Matrix<M, N, DT> Matrix<N, M, DT>::T()
 
 template <int N, int M, typename DT>
 template <int N1, int M1, int MA, typename Tr>
-Matrix<N, M1, DT> Matrix<N, M, DT>::operator*(const Matrix <N1, M1, DT> &m) {
+Matrix<N, M1, DT> Matrix<N, M, DT>::operator*(const Matrix<N1, M1, DT> &m) {
   Matrix<N, M1, DT> result;
   for (int i = 0; i < N; ++i)
   {
