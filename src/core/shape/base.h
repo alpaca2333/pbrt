@@ -14,7 +14,7 @@ public:
     operator bool() { return IsHit; }
 };
 
-interface GeometryBase 
+class IShape 
 {
 public:   
     virtual HitInfo TryHit(const Ray& r) = 0;
