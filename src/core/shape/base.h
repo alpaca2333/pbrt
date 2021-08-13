@@ -1,5 +1,7 @@
 #pragma once
 
+#include "bound.h"
+
 #include "camera/ray.h"
 #include "math/vector.h"
 
@@ -17,5 +19,6 @@ public:
 class IShape 
 {
 public:   
+    virtual Bound GetBound() = 0;
     virtual HitInfo TryHit(const Ray& r) = 0;
 };

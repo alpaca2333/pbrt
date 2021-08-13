@@ -15,7 +15,7 @@
 #include <cstring>
 #include <sstream>
 
-#define VERY_SMALL_FLAOT 0.00000001
+#define VERY_SMALL_FLAOT 1e-100
 #define interface class
 
 // D for dimensions, T for data type.
