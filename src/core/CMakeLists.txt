@@ -12,12 +12,6 @@ file(GLOB CORE_TEST_FILES
         test/*.cpp
         )
 
-include_directories(
-        concurrency
-        geometry
-        math
-        )
-
 add_library(core ${CORE_SOURCE_FILES})
 add_executable(test_core ${CORE_SOURCE_FILES} ${CORE_TEST_FILES})
 

@@ -1,6 +1,6 @@
 #include <cmath>
 
-#include "shape/base.h"
+#include "base.h"
 
 /* Plane 表示满足方程 Ax + By + Cz + D = 0 的平面 */
 class Plane: public IShape

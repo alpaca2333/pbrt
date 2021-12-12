@@ -21,12 +21,12 @@ protected:
 
 inline Bound::Bound(Point3f p_min, Point3f p_max)
 {
-    p_min = Point3f{
+    this->p_min = Point3f{
         std::min(p_min[0], p_max[0]),
         std::min(p_min[1], p_max[1]),
         std::min(p_min[2], p_max[2]),
     };
-    p_max = Point3f{
+    this->p_max = Point3f{
         std::max(p_min[0], p_max[0]),
         std::max(p_min[1], p_max[1]),
         std::max(p_min[2], p_max[2]),

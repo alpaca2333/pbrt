@@ -1,9 +1,9 @@
 #include <iostream>
 
-#include "core/math/matrix.h"
-#include "core/math/transform.h"
-#include "core/camera/ray.h"
-#include "core/shape/bound.h"
+#include "math/matrix.h"
+#include "math/transform.h"
+#include "camera/ray.h"
+#include "shape/bound.h"
 
 #include "spdlog/spdlog.h"
 
@@ -12,6 +12,12 @@ using namespace Transform;
 using namespace spdlog;
 
 using Vec4f = Vector<4, float>;
+
+void test()
+{
+    unique_ptr<int> p1 = make_unique<int>(3);
+    auto p2 = std::move(p1); // 合法
+}
 
 int main() {
     Vector3f v1{1, 2, 3};

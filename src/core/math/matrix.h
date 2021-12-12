@@ -82,7 +82,7 @@ Matrix<N, M1, DT> Matrix<N, M, DT>::operator*(const Matrix<N1, M1, DT> &m) {
 
 template <int N, int M, typename DT>
 template <int U, typename>
-Matrix<N, M, DT>::Matrix(std::initializer_list<DT> args)
+inline Matrix<N, M, DT>::Matrix(std::initializer_list<DT> args)
 {
   int i = 0;
   for (auto arg: args)
